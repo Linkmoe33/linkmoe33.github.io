@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Base64文件加密解密工具</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Base64文件加密解密工具</h1>
+            <p>选择文件并选择加密或解密操作</p>
+        </header>
+        
+        <main>
+            <div class="upload-area" id="uploadArea">
+                <div class="upload-content">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="17 8 12 3 7 8"></polyline>
+                        <line x1="12" y1="3" x2="12" y2="15"></line>
+                    </svg>
+                    <p>拖放文件到此处，或<label for="fileInput" class="browse-btn">浏览文件</label></p>
+                    <input type="file" id="fileInput" hidden>
+                    <p class="file-info" id="fileInfo"></p>
+                </div>
+            </div>
+            
+            <div class="options">
+                <div class="radio-group">
+                    <input type="radio" id="encrypt" name="operation" value="encrypt" checked>
+                    <label for="encrypt">加密</label>
+                    
+                    <input type="radio" id="decrypt" name="operation" value="decrypt">
+                    <label for="decrypt">解密</label>
+                </div>
+                
+                <button id="processBtn" class="process-btn" disabled>开始处理</button>
+            </div>
+            
+            <div class="progress-area" id="progressArea" style="display: none;">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <p class="progress-text" id="progressText">处理中... 0%</p>
+            </div>
+            
+            <div class="result-area" id="resultArea" style="display: none;">
+                <p id="resultText"></p>
+                <button id="downloadBtn" class="download-btn">下载文件</button>
+            </div>
+        </main>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html>
