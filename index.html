@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>域名删除记录浏览器</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>域名删除记录浏览器</h1>
+        </header>
+        
+        <div class="main-layout">
+            <div class="sidebar">
+                <div class="breadcrumb" id="breadcrumb">
+                    <span class="breadcrumb-item" data-path="">根目录</span>
+                </div>
+                
+                <div class="controls">
+                    <div class="button-row">
+                        <button id="backBtn" class="nav-btn" disabled>返回上级</button>
+                        <button id="homeBtn" class="nav-btn">返回根目录</button>
+                    </div>
+                    <div class="button-row">
+                        <button id="refreshBtn" class="refresh-btn">刷新</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="content">
+                <div class="file-explorer">
+                    <h2 id="currentPath">根目录</h2>
+                    <div id="fileList" class="file-list">
+                        <div class="empty-state">
+                            <p>加载中...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="fileViewer" class="file-viewer hidden">
+            <div class="file-viewer-header">
+                <h3 id="fileName">文件名</h3>
+                <button id="closeViewer" class="close-btn">×</button>
+            </div>
+            <div id="fileContent" class="file-content">
+                <!-- 文件内容将通过JavaScript动态加载 -->
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
