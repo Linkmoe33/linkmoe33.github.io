@@ -1,9 +1,16 @@
-// === 1. 全局配置与状态 ===
+/**
+ * 域名删除记录查看器 - 核心逻辑脚本
+ * 功能：动态日期生成、GB2312解码读取、响应式交互
+ */
+
+// === 1. 全局配置 ===
 const config = {
     tlds: ["中国", "cn"],
-    startDate: new Date(2025, 7, 1) // 2025年8月1日 (月份从0开始)
+    startDate: new Date(2025, 7, 1), // 起始日期：2025年8月1日 (月份索引0-11)
+    updateHour: 6 // 每天北京时间 06:00 更新
 };
 
+// === 2. DOM 元素获取 ===
 const treeRoot = document.getElementById('file-tree');
 const contentArea = document.getElementById('content-area');
 const breadcrumb = document.getElementById('breadcrumb');
@@ -11,29 +18,40 @@ const sidebar = document.getElementById('sidebar');
 const menuBtn = document.getElementById('menu-btn');
 const overlay = document.getElementById('sidebar-overlay');
 
-// === 2. 移动端交互逻辑 ===
-function toggleSidebar() {
-    sidebar.classList.toggle('open');
-    overlay.classList.toggle('show');
+// === 3. 初始化与事件监听 ===
+
+// 手机端菜单开关
+if (menuBtn && overlay) {
+    const toggleSidebar = () => {
+        sidebar.classList.toggle('open');
+        overlay.classList.toggle('show');
+    };
+    menuBtn.addEventListener('click', toggleSidebar);
+    overlay.addEventListener('click', toggleSidebar);
 }
 
-if (menuBtn) menuBtn.addEventListener('click', toggleSidebar);
-if (overlay) overlay.addEventListener('click', toggleSidebar);
-
-// === 3. 日期处理逻辑 ===
-function pad(n) { 
-    return n.toString().padStart(2, '0'); 
-}
-
+/**
+ * 4. 核心日期生成逻辑
+ * 逻辑：从2025-08-01开始，如果当前时间未到06:00，则不显示当天的文件
+ */
 function generateDateTree() {
     const data = {};
     config.tlds.forEach(tld => data[tld] = {});
 
     let currentDate = new Date(config.startDate);
+    
+    // 获取当前时间判定截止日期
     const now = new Date();
-    now.setHours(23, 59, 59, 999);
+    const deadlineDate = new Date(now);
+    
+    // 如果当前小时数小于 6点，则日期上限设为昨天
+    if (now.getHours() < config.updateHour) {
+        deadlineDate.setDate(now.getDate() - 1);
+    }
+    deadlineDate.setHours(23, 59, 59, 999);
 
-    while (currentDate <= now) {
+    // 循环生成直到截止日期
+    while (currentDate <= deadlineDate) {
         const year = currentDate.getFullYear();
         const month = currentDate.getMonth() + 1;
         const day = currentDate.getDate();
@@ -45,7 +63,10 @@ function generateDateTree() {
         config.tlds.forEach(tld => {
             if (!data[tld][yearKey]) data[tld][yearKey] = {};
             if (!data[tld][yearKey][monthKey]) data[tld][yearKey][monthKey] = [];
-            data[tld][yearKey][monthKey].push(fileName);
+            // 避免重复（逻辑保险）
+            if (!data[tld][yearKey][monthKey].includes(fileName)) {
+                data[tld][yearKey][monthKey].push(fileName);
+            }
         });
 
         currentDate.setDate(currentDate.getDate() + 1);
@@ -53,10 +74,13 @@ function generateDateTree() {
     return data;
 }
 
-// === 4. 树形结构渲染 ===
+/**
+ * 5. 递归渲染树形结构
+ */
 function renderTree(nodeData, parentElement, currentPath) {
     if (Array.isArray(nodeData)) {
-        nodeData.forEach(fileName => {
+        // 渲染文件节点
+        nodeData.sort().reverse().forEach(fileName => { // 最新的日期排在前面
             const li = document.createElement('li');
             const relPath = `.${currentPath}/${fileName}`;
             
@@ -72,7 +96,8 @@ function renderTree(nodeData, parentElement, currentPath) {
         return;
     }
 
-    const keys = Object.keys(nodeData).sort((a, b) => parseInt(a) - parseInt(b));
+    // 渲染目录节点（年份、月份）
+    const keys = Object.keys(nodeData).sort((a, b) => parseInt(b) - parseInt(a)); // 倒序排列，方便查看近期
 
     keys.forEach(key => {
         const li = document.createElement('li');
@@ -95,20 +120,24 @@ function renderTree(nodeData, parentElement, currentPath) {
             li.classList.toggle('expanded');
         });
 
+        // 默认展开顶级域名
         if (currentPath === "") li.classList.add('expanded');
 
         renderTree(nodeData[key], ul, newPath);
     });
 }
 
-// === 5. 文件加载 (支持 GB2312) ===
+/**
+ * 6. 加载并解码文件内容
+ */
 window.loadFile = function(filePath, fileName, element) {
-    // 手机端自动收起菜单
-    if (window.innerWidth <= 768) {
-        toggleSidebar();
+    // 手机端选完后自动收起侧边栏
+    if (window.innerWidth <= 768 && sidebar.classList.contains('open')) {
+        sidebar.classList.remove('open');
+        overlay.classList.remove('show');
     }
 
-    // UI 状态更新
+    // 更新 UI 选中状态
     document.querySelectorAll('.tree-item').forEach(el => el.classList.remove('active'));
     element.classList.add('active');
     breadcrumb.textContent = filePath.replace(/^\./, '');
@@ -117,15 +146,15 @@ window.loadFile = function(filePath, fileName, element) {
 
     fetch(filePath)
         .then(response => {
-            if (!response.ok) throw new Error(`文件未找到 (${response.status})`);
-            return response.arrayBuffer();
+            if (!response.ok) throw new Error(`文件尚未生成或不存在 (${response.status})`);
+            return response.arrayBuffer(); // 必须读取为原始二进制
         })
         .then(buffer => {
-            const decoder = new TextDecoder('gb2312'); // 处理 GB2312 编码
+            const decoder = new TextDecoder('gb2312'); // 核心：按 GB2312 编码解码
             const text = decoder.decode(buffer);
             
             if (!text.trim()) {
-                contentArea.innerHTML = `<div class="status-msg">文件内容为空</div>`;
+                contentArea.innerHTML = `<div class="status-msg">该文件内容为空</div>`;
             } else {
                 contentArea.innerHTML = `<pre>${escapeHtml(text)}</pre>`;
             }
@@ -139,10 +168,16 @@ window.loadFile = function(filePath, fileName, element) {
         });
 };
 
+// === 7. 工具函数 ===
+
+function pad(n) { 
+    return n.toString().padStart(2, '0'); 
+}
+
 function escapeHtml(text) {
     return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
-// === 6. 初始化执行 ===
+// === 8. 启动初始化 ===
 const treeData = generateDateTree();
 renderTree(treeData, treeRoot, "");
