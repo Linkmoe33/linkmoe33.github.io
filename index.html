@@ -2,58 +2,41 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>域名删除记录</title>
     <link rel="stylesheet" href="style.css">
-    <link href="favicon.png" rel="icon">
-    <meta name='description' content='域名删除记录，域名删除历史'>
+    <meta name='description' content='域名删除记录，域名删除历史，域名过期列表'>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>域名删除记录</h1>
-        </header>
-        
-        <div class="main-layout">
-            <div class="sidebar">
-                <div class="breadcrumb" id="breadcrumb">
-                    <span class="breadcrumb-item" data-path="">根目录</span>
-                </div>
-                
-                <div class="controls">
-                    <div class="button-row">
-                        <button id="backBtn" class="nav-btn" disabled>返回上级</button>
-                        <button id="homeBtn" class="nav-btn">返回根目录</button>
-                    </div>
-                    <div class="button-row">
-                        <button id="refreshBtn" class="refresh-btn">刷新</button>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="content">
-                <div class="file-explorer">
-                    <h2 id="currentPath">根目录</h2>
-                    <div id="fileList" class="file-list">
-                        <div class="empty-state">
-                            <p>加载中...</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
+    <div id="sidebar-overlay" class="overlay"></div>
+
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h2>📅 历史记录归档</h2>
         </div>
-        
-        <div id="fileViewer" class="file-viewer hidden">
-            <div class="file-viewer-header">
-                <h3 id="fileName">文件名</h3>
-                <button id="closeViewer" class="close-btn">×</button>
-            </div>
-            <div id="fileContent" class="file-content">
-                <!-- 文件内容将通过JavaScript动态加载 -->
-            </div>
+        <div class="tree-container">
+            <ul id="file-tree" class="tree"></ul>
         </div>
-        <p>©️数据来源<a href="https://www.cnnic.cn/">CNNIC</a></p>
     </div>
+
+    <div class="main-content">
+        <div class="toolbar">
+            <div class="menu-toggle" id="menu-btn">☰</div>
+            <span class="path-breadcrumb" id="breadcrumb">/</span>
+        </div>
+        
+        <div id="content-area" class="content-area">
+            <div class="status-msg">
+                <p>👈 请选择日期文件</p>
+            </div>
+        </div>
+
+        <footer class="app-footer">
+            <div class="left">数据来源: <a href="https://www.cnnic.cn/" target="_blank">CNNIC</a></div>
+            <div class="right">代码由 <a href="https://gemini.google.com/" target="_blank">Gemini</a> 生成</div>
+        </footer>
+    </div>
+
     <script src="script.js"></script>
 </body>
 </html>
