@@ -1,6 +1,6 @@
 // === 1. 全局配置与状态 ===
 const config = {
-    tlds: ["中国", "CN"],
+    tlds: ["中国", "cn"],
     startDate: new Date(2025, 7, 1) // 2025年8月1日 (月份从0开始)
 };
 
